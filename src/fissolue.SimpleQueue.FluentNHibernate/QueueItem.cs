@@ -6,7 +6,8 @@ namespace fissolue.SimpleQueue.FluentNHibernate
     {
         public QueueItem()
         {
-            AckId = Guid.NewGuid(); CreateDateTime = DateTime.UtcNow;
+            AckId = Guid.NewGuid();
+            CreateDateTime = DateTime.UtcNow;
         }
 
         public virtual int QueueItemId { get; set; }

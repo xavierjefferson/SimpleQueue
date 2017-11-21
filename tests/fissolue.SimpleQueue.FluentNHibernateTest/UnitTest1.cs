@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using fissolue.SimpleQueue.FluentNHibernate;
 using FluentNHibernate.Cfg.Db;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,11 +12,11 @@ namespace fissolue.SimpleQueue.FluentNHibernateTest
         [TestMethod]
         public void TestMethod1()
         {
-            var file = System.IO.Path.Combine(System.Environment.CurrentDirectory, Guid.NewGuid().ToString() + ".db");
-            IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file );
+            var file = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid() + ".db");
+            IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
             var queueInstance = new QueueInstance<int>("test2", pc, true,
                 new LocalOptions<int> {SerializationType = SerializationTypeEnum.DataContractJsonSerializer});
-            Random rx = new Random();
+            var rx = new Random();
             for (var x = 0; x < 100; x++)
                 queueInstance.Enqueue(rx.Next());
             //queueInstance.Enqueue("hello");

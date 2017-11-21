@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Threading;
 using fissolue.SimpleQueue.FluentNHibernate;
 using FluentNHibernate.Cfg.Db;
 
 namespace fissolue.SimpleQueue.Blaster
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var file = System.IO.Path.Combine(System.Environment.CurrentDirectory, "e2c49f8c-1dd0-45ac-8393-95c12dac4e4b.db");
-            //IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
-            IPersistenceConfigurer pc = MsSqlConfiguration.MsSql2008.ConnectionString(@"Data Source=.\SQLEXPRESS;database=queuetest;Integrated Security=True");
+            var file = Path.Combine(Environment.CurrentDirectory, "e2c49f8c-1dd0-45ac-8393-95c12dac4e4b.db");
+            IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
+            //IPersistenceConfigurer pc = MsSqlConfiguration.MsSql2008.ConnectionString(@"Data Source=.\SQLEXPRESS;database=queuetest;Integrated Security=True");
             var queueInstance = new QueueInstance<int>("test2", pc, true,
-                new LocalOptions<int> { SerializationType = SerializationTypeEnum.BinaryFormatter });
-               for (var x = 0; x < 100; x++)
+                new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
+            for (var x = 0; x < 100; x++)
             {
-                BackgroundWorker bw = new BackgroundWorker();
+                var bw = new BackgroundWorker();
                 var x1 = x;
                 bw.DoWork += (a, b) =>
                 {
@@ -31,7 +29,7 @@ namespace fissolue.SimpleQueue.Blaster
                         var m = queueInstance1.Dequeue();
                         if (m == null)
                         {
-                            System.Threading.Thread.Sleep(20);
+                            Thread.Sleep(20);
                         }
                         else
                         {
@@ -43,7 +41,7 @@ namespace fissolue.SimpleQueue.Blaster
                 bw.RunWorkerAsync();
             }
             //Console.ReadLine();
-            Random rx = new Random();
+            var rx = new Random();
             while (true)
             {
                 if (rx.NextDouble() < .0001)
@@ -51,9 +49,9 @@ namespace fissolue.SimpleQueue.Blaster
                     queueInstance.Purge();
                 }
                 queueInstance.Enqueue(rx.Next());
-                System.Threading.Thread.Sleep(rx.Next(1,20));
+                Thread.Sleep(rx.Next(1, 20));
             }
- 
+
             queueInstance.Purge();
         }
     }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using FluentNHibernate.Cfg;
@@ -33,8 +34,6 @@ namespace fissolue.SimpleQueue.FluentNHibernate
         private static readonly Dictionary<IPersistenceConfigurer, ISessionFactory> myDictionary =
             new Dictionary<IPersistenceConfigurer, ISessionFactory>();
 
-        private readonly Queue _myQueue;
-
         private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
         private readonly DataContractJsonSerializer _dataContractJsonSerializer =
@@ -42,7 +41,12 @@ namespace fissolue.SimpleQueue.FluentNHibernate
 
         private readonly TimeSpan _dateOffset = TimeSpan.Zero;
 
+        private readonly Queue _myQueue;
+
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(T));
+
+        private readonly JsonSerializerSettings settings =
+            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
 
         static QueueInstance()
         {
@@ -279,40 +283,34 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             return DateTime.UtcNow.Add(_dateOffset);
         }
 
-        private JsonSerializerSettings settings =
-            new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.All};
-
         private byte[] SerializeItem(T item, SerializationTypeEnum serializationType)
         {
-         
-                switch (serializationType)
-                {
-                    case SerializationTypeEnum.BinaryFormatter:
+            switch (serializationType)
+            {
+                case SerializationTypeEnum.BinaryFormatter:
 
-                        using (var mx = new MemoryStream())
-                        {
-                            _binaryFormatter.Serialize(mx, item);
-                            return mx.ToArray();
-                        }
-                    case SerializationTypeEnum.NewtonsoftJson:
-                        return System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item, settings));
-                    case SerializationTypeEnum.DataContractJsonSerializer:
-                        using (var mx = new MemoryStream())
-                        {
-                            _dataContractJsonSerializer.WriteObject(mx, item);
-                            return mx.ToArray();
-
-                        }
-                    case SerializationTypeEnum.Xml:
-                        using (var mx = new MemoryStream())
-                        {
-                            _xmlSerializer.Serialize(mx, item);
-                            return mx.ToArray();
-                        }
-                    default:
-                        throw new ArgumentException(
-                            string.Format("Unknown serialization type {0}", serializationType));
-               
+                    using (var mx = new MemoryStream())
+                    {
+                        _binaryFormatter.Serialize(mx, item);
+                        return mx.ToArray();
+                    }
+                case SerializationTypeEnum.NewtonsoftJson:
+                    return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item, settings));
+                case SerializationTypeEnum.DataContractJsonSerializer:
+                    using (var mx = new MemoryStream())
+                    {
+                        _dataContractJsonSerializer.WriteObject(mx, item);
+                        return mx.ToArray();
+                    }
+                case SerializationTypeEnum.Xml:
+                    using (var mx = new MemoryStream())
+                    {
+                        _xmlSerializer.Serialize(mx, item);
+                        return mx.ToArray();
+                    }
+                default:
+                    throw new ArgumentException(
+                        string.Format("Unknown serialization type {0}", serializationType));
             }
         }
 
@@ -323,7 +321,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
                 switch (item.SerializationType)
                 {
                     case SerializationTypeEnum.NewtonsoftJson:
-                        return JsonConvert.DeserializeObject<T>(System.Text.Encoding.UTF8.GetString(mx.ToArray()));
+                        return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(mx.ToArray()));
                     case SerializationTypeEnum.BinaryFormatter:
                         return (T) _binaryFormatter.Deserialize(mx);
                     case SerializationTypeEnum.Xml:

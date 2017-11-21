@@ -19,7 +19,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
                 .Not.Nullable()
                 .CustomType<SerializationTypeEnum>();
             References(i => i.Queue).Column("QueueId").Not.Nullable();
-        
+
             LazyLoad();
         }
     }
