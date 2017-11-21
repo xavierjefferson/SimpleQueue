@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue", "fissolue.SimpleQueue.Interfaces\fissolue.SimpleQueue.csproj", "{1CAFCC86-8AC0-4BC8-BFC8-40D88ABDA338}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.Blaster", "samples\fissolue.SimpleQueue.Blaster\fissolue.SimpleQueue.Blaster.csproj", "{8722A15C-1B1A-427C-BDEA-4BE429B365A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.FluentNHibernate", "fissolue.SimpleQueue.FluentNHibernate\fissolue.SimpleQueue.FluentNHibernate.csproj", "{7D408131-22F9-4F11-9887-09CFA1DAF56D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue", "src\fissolue.SimpleQueue\fissolue.SimpleQueue.csproj", "{1CAFCC86-8AC0-4BC8-BFC8-40D88ABDA338}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.FluentNHibernateTest", "fissolue.SimpleQueue.FluentNHibernateTest\fissolue.SimpleQueue.FluentNHibernateTest.csproj", "{B30E2C71-2848-4281-AB9B-C1399593EB74}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.FluentNHibernate", "src\fissolue.SimpleQueue.FluentNHibernate\fissolue.SimpleQueue.FluentNHibernate.csproj", "{7D408131-22F9-4F11-9887-09CFA1DAF56D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.Blaster", "fissolue.SimpleQueue.Blaster\fissolue.SimpleQueue.Blaster.csproj", "{8722A15C-1B1A-427C-BDEA-4BE429B365A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.FluentNHibernateTest", "tests\fissolue.SimpleQueue.FluentNHibernateTest\fissolue.SimpleQueue.FluentNHibernateTest.csproj", "{B30E2C71-2848-4281-AB9B-C1399593EB74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +17,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1CAFCC86-8AC0-4BC8-BFC8-40D88ABDA338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1CAFCC86-8AC0-4BC8-BFC8-40D88ABDA338}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CAFCC86-8AC0-4BC8-BFC8-40D88ABDA338}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -29,10 +33,6 @@ Global
 		{B30E2C71-2848-4281-AB9B-C1399593EB74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B30E2C71-2848-4281-AB9B-C1399593EB74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B30E2C71-2848-4281-AB9B-C1399593EB74}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8722A15C-1B1A-427C-BDEA-4BE429B365A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
