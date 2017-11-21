@@ -32,7 +32,7 @@ namespace fissolue.SimpleQueue
         ///     After you have received an item from a queue and processed it, you can delete it by calling Acknowledge() with the
         ///     unique ackId returned
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="ackId"></param>
         void Acknowledge(Guid ackId);
 
         /// <summary>

@@ -11,6 +11,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.Fluent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fissolue.SimpleQueue.FluentNHibernateTest", "tests\fissolue.SimpleQueue.FluentNHibernateTest\fissolue.SimpleQueue.FluentNHibernateTest.csproj", "{B30E2C71-2848-4281-AB9B-C1399593EB74}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspecs", "nuspecs", "{2A287EF8-FB52-4B16-9AF1-B84AC49EC8C3}"
+	ProjectSection(SolutionItems) = preProject
+		nuspecs\fissolue.SimpleQueue.nuspec = nuspecs\fissolue.SimpleQueue.nuspec
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{727A63E3-C99A-48AD-B157-F4F4C856C87F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{881271B2-7981-4762-B349-D23AD5B7358D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +45,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8722A15C-1B1A-427C-BDEA-4BE429B365A0} = {727A63E3-C99A-48AD-B157-F4F4C856C87F}
+		{B30E2C71-2848-4281-AB9B-C1399593EB74} = {881271B2-7981-4762-B349-D23AD5B7358D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1B37E0D3-65FF-47E5-B749-01C7A17E80F5}

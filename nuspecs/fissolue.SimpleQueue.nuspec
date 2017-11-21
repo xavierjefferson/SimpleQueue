@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<package>
+  <metadata>
+    <id>fissolue.SimpleQueue</id>
+    <version>1.0.0</version>
+    <authors>Xavier Jefferson</authors>
+    <owners>XavierJ</owners>
+    <licenseUrl>https://www.gnu.org/licenses/lgpl-3.0.en.html</licenseUrl>
+    <projectUrl>https://github.com/xavierjefferson/SimpleQueue</projectUrl>
+    <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A simple implementation of a queue that runs on top of a database</description>
+    <releaseNotes>Initial build</releaseNotes>
+    <copyright>Copyright © 2017 Xavier Jefferson</copyright>
+    <tags>simplequeue queue</tags>
+    <!--<dependencies>
+      <dependency id="SampleDependency" version="1.0" />
+    </dependencies>-->
+
+
+  </metadata>
+  <files>
+    <!--<file src="net45\Hangfire.Core.dll" target="lib\net45" />
+    <file src="net45\Hangfire.Core.xml" target="lib\net45" />
+    <file src="net45\Hangfire.Core.pdb" target="lib\net45" />
+
+    <file src="net45\**\Hangfire.Core.resources.dll" target="lib\net45" />
+    
+    <file src="netstandard1.3\Hangfire.Core.dll" target="lib\netstandard1.3" />
+    <file src="netstandard1.3\Hangfire.Core.xml" target="lib\netstandard1.3" />
+    <file src="netstandard1.3\Hangfire.Core.pdb" target="lib\netstandard1.3" />
+
+    <file src="netstandard1.3\**\Hangfire.Core.resources.dll" target="lib\netstandard1.3" />-->
+    <file src="..\src\fissolue.SimpleQueue\bin\debug\fissolue.SimpleQueue.dll" target="lib\net45" />
+    <file src="..\src\fissolue.SimpleQueue\bin\debug\fissolue.SimpleQueue.xml" target="lib\net45" />
+    <file src="..\src\fissolue.SimpleQueue\bin\debug\fissolue.SimpleQueue.pdb" target="lib\net45" />
+    <file src="..\src\fissolue.SimpleQueue\**\*.cs;" target="src" exclude="**\obj*\**\*.cs" />
+  </files>
+</package>
