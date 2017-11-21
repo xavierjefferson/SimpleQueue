@@ -21,17 +21,6 @@
 
   </metadata>
   <files>
-    <!--<file src="net45\Hangfire.Core.dll" target="lib\net45" />
-    <file src="net45\Hangfire.Core.xml" target="lib\net45" />
-    <file src="net45\Hangfire.Core.pdb" target="lib\net45" />
-
-    <file src="net45\**\Hangfire.Core.resources.dll" target="lib\net45" />
-    
-    <file src="netstandard1.3\Hangfire.Core.dll" target="lib\netstandard1.3" />
-    <file src="netstandard1.3\Hangfire.Core.xml" target="lib\netstandard1.3" />
-    <file src="netstandard1.3\Hangfire.Core.pdb" target="lib\netstandard1.3" />
-
-    <file src="netstandard1.3\**\Hangfire.Core.resources.dll" target="lib\netstandard1.3" />-->
     <file src="..\src\fissolue.SimpleQueue\bin\debug\fissolue.SimpleQueue.dll" target="lib\net45" />
     <file src="..\src\fissolue.SimpleQueue\bin\debug\fissolue.SimpleQueue.xml" target="lib\net45" />
     <file src="..\src\fissolue.SimpleQueue\bin\debug\fissolue.SimpleQueue.pdb" target="lib\net45" />

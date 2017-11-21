@@ -14,7 +14,7 @@ namespace fissolue.SimpleQueue.Blaster
             var file = Path.Combine(Environment.CurrentDirectory, "e2c49f8c-1dd0-45ac-8393-95c12dac4e4b.db");
             IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
             //IPersistenceConfigurer pc = MsSqlConfiguration.MsSql2008.ConnectionString(@"Data Source=.\SQLEXPRESS;database=queuetest;Integrated Security=True");
-            var queueInstance = new QueueInstance<int>("test2", pc, true,
+            var queueInstance = new FluentNHibernateQueue<int>("test2", pc, true,
                 new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
             for (var x = 0; x < 100; x++)
             {
@@ -22,7 +22,7 @@ namespace fissolue.SimpleQueue.Blaster
                 var x1 = x;
                 bw.DoWork += (a, b) =>
                 {
-                    var queueInstance1 = new QueueInstance<int>("test2", pc, true,
+                    var queueInstance1 = new FluentNHibernateQueue<int>("test2", pc, true,
                         new LocalOptions<int> {SerializationType = SerializationTypeEnum.DataContractJsonSerializer});
                     while (true)
                     {

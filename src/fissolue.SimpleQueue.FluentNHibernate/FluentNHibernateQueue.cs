@@ -18,7 +18,7 @@ using NHibernate.Tool.hbm2ddl;
 
 namespace fissolue.SimpleQueue.FluentNHibernate
 {
-    public class QueueInstance<T> : ISimpleQueue<T>
+    public class FluentNHibernateQueue<T> : ISimpleQueue<T>
     {
         private const string AvailableParamName = "visible";
         private const string AckIdParamName = "ackId";
@@ -48,7 +48,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
         private readonly JsonSerializerSettings settings =
             new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
 
-        static QueueInstance()
+        static FluentNHibernateQueue()
         {
             var queueItemClassName = typeof(QueueItem).Name;
             var acknowledgeColumnName = ObjectHelper.GetPropertyName<QueueItem>(i => i.AcknowledgeDateTime);
@@ -70,7 +70,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
                 TriesParamName, DateNowParamName);
         }
 
-        public QueueInstance(string name, IPersistenceConfigurer configurer, bool buildSchema = false,
+        public FluentNHibernateQueue(string name, IPersistenceConfigurer configurer, bool buildSchema = false,
             LocalOptions<T> opts = null)
         {
             SessionFactory = CreateSessionFactory(configurer, buildSchema);

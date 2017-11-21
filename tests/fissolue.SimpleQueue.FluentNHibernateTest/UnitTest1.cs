@@ -14,7 +14,7 @@ namespace fissolue.SimpleQueue.FluentNHibernateTest
         {
             var file = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid() + ".db");
             IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
-            var queueInstance = new QueueInstance<int>("test2", pc, true,
+            var queueInstance = new FluentNHibernateQueue<int>("test2", pc, true,
                 new LocalOptions<int> {SerializationType = SerializationTypeEnum.DataContractJsonSerializer});
             var rx = new Random();
             for (var x = 0; x < 100; x++)
