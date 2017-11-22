@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using fissolue.SimpleQueue.EntityFramework;
 using fissolue.SimpleQueue.FluentNHibernate;
 using FluentNHibernate.Cfg.Db;
 
@@ -11,19 +12,35 @@ namespace fissolue.SimpleQueue.Blaster
     {
         private static void Main(string[] args)
         {
+            Console.WriteLine("Enter 1 to use sqlite");
+            var readLine = Console.ReadLine();
+            Func<ISimpleQueue<int>> queueFunc;
             var file = Path.Combine(Environment.CurrentDirectory, "e2c49f8c-1dd0-45ac-8393-95c12dac4e4b.db");
-            IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
-            //IPersistenceConfigurer pc = MsSqlConfiguration.MsSql2008.ConnectionString(@"Data Source=.\SQLEXPRESS;database=queuetest;Integrated Security=True");
-            var queueInstance = new FluentNHibernateQueue<int>("test2", pc, true,
-                new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
-            for (var x = 0; x < 100; x++)
+                    IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
+            if (readLine == "1")
+            {
+                queueFunc = () =>
+                {
+
+
+                    return new FluentNHibernateQueue<int>("test2", pc, true,
+                        new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
+                };
+            }
+            else
+            {
+                queueFunc = ()=>new EntityFrameworkQueue<int>("test2", "name=BlasterDBConnectionString",
+                    new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
+            }
+
+
+            for (var x = 0; x < 5; x++)
             {
                 var bw = new BackgroundWorker();
-                var x1 = x;
+                var index = x;
                 bw.DoWork += (a, b) =>
                 {
-                    var queueInstance1 = new FluentNHibernateQueue<int>("test2", pc, true,
-                        new LocalOptions<int> {SerializationType = SerializationTypeEnum.DataContractJsonSerializer});
+                    var queueInstance1 = queueFunc();
                     while (true)
                     {
                         var m = queueInstance1.Dequeue();
@@ -33,7 +50,8 @@ namespace fissolue.SimpleQueue.Blaster
                         }
                         else
                         {
-                            Console.WriteLine("{0} dequeued {1}", x1, m.AckId);
+                            Console.WriteLine("Worker {0} dequeued value {2} with ack id {1}", index, m.AckId,
+                                m.Data.ToString().PadLeft(12));
                             queueInstance1.Acknowledge(m.AckId);
                         }
                     }
@@ -42,17 +60,19 @@ namespace fissolue.SimpleQueue.Blaster
             }
             //Console.ReadLine();
             var rx = new Random();
+            var insertingQueue = queueFunc();
             while (true)
             {
                 if (rx.NextDouble() < .0001)
                 {
-                    queueInstance.Purge();
+                    Console.WriteLine("Purging...");
+                    insertingQueue.Purge();
                 }
-                queueInstance.Enqueue(rx.Next());
-                Thread.Sleep(rx.Next(1, 20));
+                insertingQueue.Enqueue(rx.Next());
+                Thread.Sleep(rx.Next(1, 5) * 100);
             }
 
-            queueInstance.Purge();
+            insertingQueue.Purge();
         }
     }
 }

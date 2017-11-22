@@ -85,6 +85,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\fissolue.SimpleQueue.EntityFramework\fissolue.SimpleQueue.EntityFramework.csproj">
+      <Project>{79473bc1-a27a-4ddb-a3a3-4fc8cdd4b06c}</Project>
+      <Name>fissolue.SimpleQueue.EntityFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\fissolue.SimpleQueue.FluentNHibernate\fissolue.SimpleQueue.FluentNHibernate.csproj">
       <Project>{7d408131-22f9-4f11-9887-09cfa1daf56d}</Project>
       <Name>fissolue.SimpleQueue.FluentNHibernate</Name>

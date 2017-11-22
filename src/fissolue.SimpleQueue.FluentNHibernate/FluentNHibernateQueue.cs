@@ -1,16 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Serialization;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
-using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Exceptions;
 using NHibernate.Linq;
@@ -18,7 +12,7 @@ using NHibernate.Tool.hbm2ddl;
 
 namespace fissolue.SimpleQueue.FluentNHibernate
 {
-    public class FluentNHibernateQueue<T> : ISimpleQueue<T>
+    public class FluentNHibernateQueue<T> : SerializingQueue<T>
     {
         private const string AvailableParamName = "visible";
         private const string AckIdParamName = "ackId";
@@ -34,19 +28,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
         private static readonly Dictionary<IPersistenceConfigurer, ISessionFactory> myDictionary =
             new Dictionary<IPersistenceConfigurer, ISessionFactory>();
 
-        private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
-
-        private readonly DataContractJsonSerializer _dataContractJsonSerializer =
-            new DataContractJsonSerializer(typeof(T));
-
         private readonly TimeSpan _dateOffset = TimeSpan.Zero;
-
-        private readonly Queue _myQueue;
-
-        private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(T));
-
-        private readonly JsonSerializerSettings settings =
-            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
 
         static FluentNHibernateQueue()
         {
@@ -108,12 +90,9 @@ namespace fissolue.SimpleQueue.FluentNHibernate
         }
 
         private ISessionFactory SessionFactory { get; }
-        private int QueueId => _myQueue.QueueId;
 
 
-        private LocalOptions<T> LocalOptions { get; }
-
-        public void Acknowledge(Guid ackId)
+        public override void Acknowledge(Guid ackId)
         {
             using (var session = GetStatelessSession())
             {
@@ -121,7 +100,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public void Enqueue(TimeSpan delay, params T[] items)
+        public override void Enqueue(TimeSpan delay, params T[] items)
         {
             using (var session = GetStatelessSession())
             {
@@ -137,12 +116,8 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public void Enqueue(params T[] items)
-        {
-            Enqueue(LocalOptions.Delay, items);
-        }
 
-        public void Purge()
+        public override void Purge()
         {
             using (var session = GetStatelessSession())
             {
@@ -150,7 +125,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public long GetAcknowledgedCount()
+        public override long GetAcknowledgedCount()
         {
             using (var session = GetStatelessSession())
             {
@@ -159,7 +134,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public long GetPendingCount()
+        public override long GetPendingCount()
         {
             using (var session = GetStatelessSession())
             {
@@ -169,7 +144,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public long GetNewCount()
+        public override long GetNewCount()
         {
             using (var session = GetStatelessSession())
             {
@@ -179,7 +154,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public long GetTotalCount()
+        public override long GetTotalCount()
         {
             using (var session = GetStatelessSession())
             {
@@ -187,10 +162,10 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        public DequeueResult<T> Dequeue(TimeSpan? opts = null)
+        public override DequeueResult<T> Dequeue(TimeSpan? opts = null)
         {
             var visibility = opts ?? LocalOptions.Visibility;
-            return DeadlockHelper.Execute(() =>
+            return Execute(() =>
             {
                 using (var session = GetStatelessSession())
                 {
@@ -224,7 +199,7 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             });
         }
 
-        public void Extend(Guid ackId, TimeSpan? duration = null)
+        public override void Extend(Guid ackId, TimeSpan? duration = null)
         {
             var myVisibility = duration ?? LocalOptions.Visibility;
 
@@ -239,28 +214,33 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
+        object mutex = new object();
+
         private ISessionFactory CreateSessionFactory(IPersistenceConfigurer config, bool schemaUpdate)
         {
-            if (myDictionary.ContainsKey(config))
-                return myDictionary[config];
-            var fluentConfiguration = Fluently.Configure()
-                .Database(config)
-                .Mappings(m => m.FluentMappings.AddFromAssemblyOf<QueueMap>());
-            FluentConfiguration exposeConfiguration;
-            if (schemaUpdate)
+            lock (myDictionary)
             {
-                string text;
-                exposeConfiguration = fluentConfiguration
-                    .ExposeConfiguration(cfg => new SchemaUpdate(cfg).Execute(i => text = i, true));
+                if (myDictionary.ContainsKey(config))
+                    return myDictionary[config];
+                var fluentConfiguration = Fluently.Configure()
+                    .Database(config)
+                    .Mappings(m => m.FluentMappings.AddFromAssemblyOf<QueueMap>());
+                FluentConfiguration exposeConfiguration;
+                if (schemaUpdate)
+                {
+                    string text;
+                    exposeConfiguration = fluentConfiguration
+                        .ExposeConfiguration(cfg => new SchemaUpdate(cfg).Execute(i => text = i, true));
+                }
+                else
+                {
+                    exposeConfiguration = fluentConfiguration;
+                }
+                var sessionFactory = exposeConfiguration
+                    .BuildSessionFactory();
+                myDictionary[config] = sessionFactory;
+                return sessionFactory;
             }
-            else
-            {
-                exposeConfiguration = fluentConfiguration;
-            }
-            var sessionFactory = exposeConfiguration
-                .BuildSessionFactory();
-            myDictionary[config] = sessionFactory;
-            return sessionFactory;
         }
 
         private IStatelessSession GetStatelessSession()
@@ -283,81 +263,27 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             return DateTime.UtcNow.Add(_dateOffset);
         }
 
-        private byte[] SerializeItem(T item, SerializationTypeEnum serializationType)
-        {
-            switch (serializationType)
-            {
-                case SerializationTypeEnum.BinaryFormatter:
 
-                    using (var mx = new MemoryStream())
-                    {
-                        _binaryFormatter.Serialize(mx, item);
-                        return mx.ToArray();
-                    }
-                case SerializationTypeEnum.NewtonsoftJson:
-                    return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item, settings));
-                case SerializationTypeEnum.DataContractJsonSerializer:
-                    using (var mx = new MemoryStream())
-                    {
-                        _dataContractJsonSerializer.WriteObject(mx, item);
-                        return mx.ToArray();
-                    }
-                case SerializationTypeEnum.Xml:
-                    using (var mx = new MemoryStream())
-                    {
-                        _xmlSerializer.Serialize(mx, item);
-                        return mx.ToArray();
-                    }
-                default:
-                    throw new ArgumentException(
-                        string.Format("Unknown serialization type {0}", serializationType));
-            }
-        }
-
-        private T DeserializeItem(QueueItem item)
+        public static TT Execute<TT>(Func<TT> func)
         {
-            using (var mx = new MemoryStream(item.Payload))
-            {
-                switch (item.SerializationType)
+            while (true)
+                try
                 {
-                    case SerializationTypeEnum.NewtonsoftJson:
-                        return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(mx.ToArray()));
-                    case SerializationTypeEnum.BinaryFormatter:
-                        return (T) _binaryFormatter.Deserialize(mx);
-                    case SerializationTypeEnum.Xml:
-                        return (T) _xmlSerializer.Deserialize(mx);
-                    case SerializationTypeEnum.DataContractJsonSerializer:
-                        return (T) _dataContractJsonSerializer.ReadObject(mx);
-                    default:
-                        throw new ArgumentException(
-                            string.Format("Unknown serialization type {0}", item.SerializationType));
+                    return func();
                 }
-            }
-        }
-
-        private class DeadlockHelper
-        {
-            public static TT Execute<TT>(Func<TT> func)
-            {
-                while (true)
-                    try
-                    {
-                        return func();
-                    }
-                    catch (GenericADOException ex)
-                    {
-                        var sqlException = ex.InnerException as SqlException;
-                        if (sqlException == null)
-                            throw;
-                        if (sqlException.ErrorCode != -2146232060)
-                            throw;
-                    }
-                    catch (SqlException ex)
-                    {
-                        if (ex.ErrorCode != 1205)
-                            throw;
-                    }
-            }
+                catch (GenericADOException ex)
+                {
+                    var sqlException = ex.InnerException as SqlException;
+                    if (sqlException == null)
+                        throw;
+                    if (sqlException.ErrorCode != -2146232060)
+                        throw;
+                }
+                catch (SqlException ex)
+                {
+                    if (ex.ErrorCode != 1205)
+                        throw;
+                }
         }
     }
 }
