@@ -1,12 +1,5 @@
 SimpleQueue - a simple database-backed queue implementation for .NET
-========================================
-
-
-Release Notes
--------------
-
-
-
+====================================================================
 
 Features
 --------
@@ -16,16 +9,16 @@ You can decide the best way to persist the data - all have advantages and disadv
 
 Once initialized, there are four core methods:
 
-(1) Enqueue an object
-(2) Dequeue an object (note that any dequeued object may be dequeued again if you fail to call the Acknowledge method after using it)
-(3) Acknowledge - this means you've processed an dequeued item so it is no longer available.
-(4) Purge.  This removes ALL acknowledged items from persistence and should only be called periodically to clean up the database tables.
+* Enqueue an object
+* Dequeue an object (note that any dequeued object may be dequeued again if you fail to call the Acknowledge method after using it)
+* Acknowledge - this means you've processed an dequeued item so it is no longer available.
+* Purge.  This removes ALL acknowledged items from persistence and should only be called periodically to clean up the database tables.
 
 Example usage:
 
 ```csharp
 using System;
-using System.ComponentModel;
+using System.ComponentModel;	
 using System.IO;
 using System.Threading;
 using fissolue.SimpleQueue.EntityFramework;
@@ -43,7 +36,7 @@ public class Program
 		
 		//ok, enqueue some items
 		for(var i = 0; i<10; i++){
-			myQueue.Enqueue(i);
+		    myQueue.Enqueue(i);
 		}
 		
 		//now, de-queue them
