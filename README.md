@@ -7,11 +7,12 @@ SimpleQueue is a [NuGet library](https://www.nuget.org/packages/fissolue.SimpleQ
 
 You can decide the best way to persist the data - all have advantages and disadvantages.  You can use .NET's binary serialization, JSON.net serialization, the DataContractJsonSerializer, or XML.  For binary serialization, any complex objects must be tagged with the [Serializable] attribute.
 
-Once initialized, there are four core methods:
+Once initialized, there are five core methods:
 
 * Enqueue an object
-* Dequeue an object (note that any dequeued object may be dequeued again if you fail to call the Acknowledge method after using it)
-* Acknowledge - this means you've processed an dequeued item so it is no longer available.
+* Dequeue an object (note that any dequeued object may be dequeued again if you fail to call the Acknowledge method after using it.  It will become invisible to all clients for a default of 30 seconds.)
+* Acknowledge.  This means you're done with your processed an dequeued item so it won't become visible to clients again.
+* Extend.  After you've dequeued an item, call this method at any time if you need more time to process it before it automatically goes back into the pool.
 * Purge.  This removes ALL acknowledged items from persistence and should only be called periodically to clean up the database tables.
 
 Example usage:
