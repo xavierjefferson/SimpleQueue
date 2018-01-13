@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
 using NHibernate.Exceptions;
 using NHibernate.Linq;
-using NHibernate.Tool.hbm2ddl;
+using Snork.FluentNHibernateTools;
 
 namespace fissolue.SimpleQueue.FluentNHibernate
 {
@@ -25,10 +23,9 @@ namespace fissolue.SimpleQueue.FluentNHibernate
         private static readonly string AckQuerySql;
         private static readonly string GetUpdateSql;
 
-        private static readonly Dictionary<IPersistenceConfigurer, ISessionFactory> myDictionary =
-            new Dictionary<IPersistenceConfigurer, ISessionFactory>();
 
         private readonly TimeSpan _dateOffset = TimeSpan.Zero;
+
 
         static FluentNHibernateQueue()
         {
@@ -52,10 +49,15 @@ namespace fissolue.SimpleQueue.FluentNHibernate
                 TriesParamName, DateNowParamName);
         }
 
-        public FluentNHibernateQueue(string name, IPersistenceConfigurer configurer, bool buildSchema = false,
-            LocalOptions<T> opts = null)
+        public FluentNHibernateQueue(string name, ProviderTypeEnum providerType, string nameOrConnectionString,
+            LocalOptions<T> opts = null, FluentNHibernatePersistenceBuilderOptions builderOptions = null) : this(name,
+            SessionFactoryBuilder.GetFromAssemblyOf<QueueItemMap>(providerType, nameOrConnectionString, builderOptions))
         {
-            SessionFactory = CreateSessionFactory(configurer, buildSchema);
+        }
+
+        public FluentNHibernateQueue(string name, SessionFactoryInfo info, LocalOptions<T> opts = null)
+        {
+            Info = info;
 
             LocalOptions = opts ?? new LocalOptions<T>();
 
@@ -89,7 +91,14 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        private ISessionFactory SessionFactory { get; }
+        public FluentNHibernateQueue(string name, IPersistenceConfigurer configurer, bool buildSchema = false,
+            LocalOptions<T> opts = null) : this(name, SessionFactoryBuilder
+            .GetFromAssemblyOf<QueueItemMap>(configurer,
+                new FluentNHibernatePersistenceBuilderOptions {UpdateSchema = buildSchema}), opts)
+        {
+        }
+
+        public SessionFactoryInfo Info { get; }
 
 
         public override void Acknowledge(Guid ackId)
@@ -214,38 +223,10 @@ namespace fissolue.SimpleQueue.FluentNHibernate
             }
         }
 
-        object mutex = new object();
-
-        private ISessionFactory CreateSessionFactory(IPersistenceConfigurer config, bool schemaUpdate)
-        {
-            lock (myDictionary)
-            {
-                if (myDictionary.ContainsKey(config))
-                    return myDictionary[config];
-                var fluentConfiguration = Fluently.Configure()
-                    .Database(config)
-                    .Mappings(m => m.FluentMappings.AddFromAssemblyOf<QueueMap>());
-                FluentConfiguration exposeConfiguration;
-                if (schemaUpdate)
-                {
-                    string text;
-                    exposeConfiguration = fluentConfiguration
-                        .ExposeConfiguration(cfg => new SchemaUpdate(cfg).Execute(i => text = i, true));
-                }
-                else
-                {
-                    exposeConfiguration = fluentConfiguration;
-                }
-                var sessionFactory = exposeConfiguration
-                    .BuildSessionFactory();
-                myDictionary[config] = sessionFactory;
-                return sessionFactory;
-            }
-        }
 
         private IStatelessSession GetStatelessSession()
         {
-            return SessionFactory.OpenStatelessSession();
+            return Info.SessionFactory.OpenStatelessSession();
         }
 
         private void _Acknowledge(Guid ackId, IStatelessSession session)

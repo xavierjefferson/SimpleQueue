@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using fissolue.SimpleQueue.EntityFramework;
 using fissolue.SimpleQueue.FluentNHibernate;
 using FluentNHibernate.Cfg.Db;
+using Snork.FluentNHibernateTools;
 
 namespace fissolue.SimpleQueue.Blaster
 {
@@ -12,25 +12,41 @@ namespace fissolue.SimpleQueue.Blaster
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("Enter 1 to use sqlite");
-            var readLine = Console.ReadLine();
-            Func<ISimpleQueue<int>> queueFunc;
-            var file = Path.Combine(Environment.CurrentDirectory, "e2c49f8c-1dd0-45ac-8393-95c12dac4e4b.db");
-                    IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
-            if (readLine == "1")
+            Func<ISimpleQueue<int>> queueFunc = null;
+            while (queueFunc == null)
             {
-                queueFunc = () =>
+                Console.WriteLine("Options");
+                Console.WriteLine("Enter 1 to use sqlite/NHibernate");
+
+                Console.WriteLine("Enter 3 to use Mysql/NHIbernate");
+                Console.WriteLine("Press Enter to exit");
+                var readLine = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(readLine))
                 {
+                    return;
+                }
+                var file = Path.Combine(Environment.CurrentDirectory, "e2c49f8c-1dd0-45ac-8393-95c12dac4e4b.db");
 
+                switch (readLine)
+                {
+                    case "1":
+                        queueFunc = () =>
+                        {
+                            IPersistenceConfigurer pc = SQLiteConfiguration.Standard.UsingFile(file);
 
-                    return new FluentNHibernateQueue<int>("test2", pc, true,
-                        new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
-                };
-            }
-            else
-            {
-                queueFunc = ()=>new EntityFrameworkQueue<int>("test2", "name=BlasterDBConnectionString",
-                    new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
+                            return new FluentNHibernateQueue<int>("test2", pc, true,
+                                new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
+                        };
+                        break;
+                    case "3":
+                        queueFunc = () =>
+                        {
+                            return new FluentNHibernateQueue<int>("test2", ProviderTypeEnum.MySQL,
+                                "Server=localhost;Database=simplequeue;Uid=simplequeue;Pwd=password;",
+                                new LocalOptions<int> {SerializationType = SerializationTypeEnum.BinaryFormatter});
+                        };
+                        break;
+                }
             }
 
 
